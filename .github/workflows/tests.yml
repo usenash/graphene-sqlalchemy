@@ -18,7 +18,7 @@ jobs:
         python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
@@ -34,7 +34,7 @@ jobs:
           TOXENV: ${{ matrix.toxenv }}
       - name: Upload coverage.xml
         if: ${{ matrix.sql-alchemy == '1.4' && matrix.python-version == '3.10' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: graphene-sqlalchemy-coverage
           path: coverage.xml
