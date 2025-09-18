@@ -3,7 +3,7 @@ import logging
 import warnings
 from collections import OrderedDict
 from functools import partial
-from inspect import isawaitable
+from inspect import isawaitable, isclass
 from typing import Any, Optional, Type, Union
 
 import sqlalchemy
@@ -160,10 +160,10 @@ def filter_field_from_field(
     model_attr_name: str,
 ) -> Optional[graphene.InputField]:
     # Field might be a SQLAlchemyObjectType, due to hybrid properties
-    if issubclass(type_, SQLAlchemyObjectType):
+    if isclass(type_) and issubclass(type_, SQLAlchemyObjectType):
         filter_class = registry.get_filter_for_base_type(type_)
     # Enum Special Case
-    elif issubclass(type_, graphene.Enum) and isinstance(model_attr, ColumnProperty):
+    elif isclass(type_) and issubclass(type_, graphene.Enum) and isinstance(model_attr, ColumnProperty):
         column = model_attr.columns[0]
         model_enum_type: Optional[sqlalchemy.types.Enum] = getattr(column, "type", None)
         if not getattr(model_enum_type, "enum_class", None):
@@ -171,6 +171,8 @@ def filter_field_from_field(
         else:
             filter_class = registry.get_filter_for_py_enum_type(type_)
     else:
+        if not isclass(type_):
+            type_ = type(type_)
         filter_class = registry.get_filter_for_scalar_type(type_)
     if not filter_class:
         warnings.warn(
